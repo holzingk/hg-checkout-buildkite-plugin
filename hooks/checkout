@@ -1,0 +1,37 @@
+#!/bin/bash
+set -euo pipefail
+
+# Vars:
+# DIR BUILDKITE_BUILD_CHECKOUT_PATH
+# REV  BUILDKITE_COMMIT
+# URL BUILDKITE_REPO
+#
+
+#BUILDKITE_PULL_REQUEST
+
+mkdir -p ${BUILDKITE_BUILD_CHECKOUT_PATH}
+cd ${BUILDKITE_BUILD_CHECKOUT_PATH}
+if [ -d .hg ]
+then
+    sed -i "d#default#default = ${BUILDKITE_REPO}" .hg/hgrc
+    hg update
+else
+    hg clone $BUILDKITE_REPO
+fi
+
+# add ssh to known hosts
+hg pull
+$PURGE_RET = hg purge --all
+if [[ *"'purge' is provided by the following extension"* == $PURGE_RET ]]
+then
+    echo "\n[extensions]\nhgext.purge=\n" >> .hg/hgrc
+    hg purge --all
+fi
+
+hg update -C -r ${BUILDKITE_COMMIT}
+
+# if refspec: checkout
+# else: checkout pull request head
+# else checkout head
+
+# send author and commit info to buildkite

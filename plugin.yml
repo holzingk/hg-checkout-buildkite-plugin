@@ -1,0 +1,4 @@
+name: hg
+description: Checks out mercurial repositories
+author: Kilian Holzinger
+requirements: []
